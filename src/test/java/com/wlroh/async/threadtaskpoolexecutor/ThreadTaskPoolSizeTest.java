@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.concurrent.RejectedExecutionException;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Slf4j
@@ -88,6 +91,39 @@ public class ThreadTaskPoolSizeTest {
         threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
         사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 5);
         현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
+    }
+
+    @DisplayName("maxPoolSize 에 도달하면 기본 정책일 경우 예외를 반환한다.")
+    @Test
+    void maxPoolSize() {
+        // given
+        코어풀_사이즈_조회됨(threadPoolTaskExecutor2, 2);
+        최대_풀_사이즈_조회됨(threadPoolTaskExecutor2, 5);
+        큐_용량_조회됨(threadPoolTaskExecutor2, 0);
+
+        // when
+        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 1);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
+
+        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 2);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
+
+        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 3);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
+
+        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 4);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
+
+        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 5);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
+
+        assertThatThrownBy(() -> threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds))
+                .isInstanceOf(RejectedExecutionException.class);
     }
 
     private void 코어풀_사이즈_조회됨(final ThreadPoolTaskExecutor executor, final int corePoolSize) {
