@@ -35,8 +35,8 @@ public class ThreadPoolConfig {
     @Bean
     public ThreadPoolTaskExecutor threadPoolTaskExecutor3() {
         final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(2); // 기본 스레드 수
-        taskExecutor.setMaxPoolSize(5); // 최대 스레드 수
+        taskExecutor.setCorePoolSize(1); // 기본 스레드 수
+        taskExecutor.setMaxPoolSize(1); // 최대 스레드 수
         taskExecutor.setQueueCapacity(0);
         taskExecutor.setThreadNamePrefix("Executor3-");
         taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());

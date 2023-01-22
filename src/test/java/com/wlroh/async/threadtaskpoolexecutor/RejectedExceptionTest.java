@@ -23,29 +23,13 @@ public class RejectedExceptionTest {
     @Test
     void abortPolicyTest() {
         // given
-        코어풀_사이즈_조회됨(threadPoolTaskExecutor3, 2);
-        최대_풀_사이즈_조회됨(threadPoolTaskExecutor3, 5);
+        코어풀_사이즈_조회됨(threadPoolTaskExecutor3, 1);
+        최대_풀_사이즈_조회됨(threadPoolTaskExecutor3, 1);
         큐_용량_조회됨(threadPoolTaskExecutor3, 0);
 
         // when
         threadPoolTaskExecutor3.execute(this::executeTaskForFiveSeconds);
         사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor3, 1);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor3, 0);
-
-        threadPoolTaskExecutor3.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor3, 2);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor3, 0);
-
-        threadPoolTaskExecutor3.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor3, 3);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor3, 0);
-
-        threadPoolTaskExecutor3.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor3, 4);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor3, 0);
-
-        threadPoolTaskExecutor3.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor3, 5);
         현재_큐_사이즈_조회됨(threadPoolTaskExecutor3, 0);
 
         assertThatThrownBy(() -> threadPoolTaskExecutor3.execute(this::executeTaskForFiveSeconds))
