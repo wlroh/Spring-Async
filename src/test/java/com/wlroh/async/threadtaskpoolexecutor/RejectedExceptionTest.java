@@ -11,6 +11,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.concurrent.RejectedExecutionException;
 
 import static com.wlroh.async.threadtaskpoolexecutor.ThreadPoolStep.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Slf4j
@@ -50,15 +51,14 @@ public class RejectedExceptionTest {
         코어풀_사이즈_조회됨(threadPoolTaskExecutor4, 1);
         최대_풀_사이즈_조회됨(threadPoolTaskExecutor4, 1);
         큐_용량_조회됨(threadPoolTaskExecutor4, 0);
+        final Thread requestThread = Thread.currentThread();
 
         // when
-        threadPoolTaskExecutor4.execute(this::executeTaskForFiveSeconds);
+        threadPoolTaskExecutor4.execute(() -> this.executeTaskForFiveSeconds(requestThread, false));
         사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor4, 1);
         현재_큐_사이즈_조회됨(threadPoolTaskExecutor4, 0);
 
-        threadPoolTaskExecutor4.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor4, 1);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor4, 0);
+        threadPoolTaskExecutor4.execute(() -> this.executeTaskForFiveSeconds(requestThread, true));
     }
 
     private void executeTaskForFiveSeconds() {
@@ -69,5 +69,15 @@ public class RejectedExceptionTest {
             throw new RuntimeException(e);
         }
         log.info("end do task");
+    }
+
+    private void executeTaskForFiveSeconds(final Thread requestThread, final boolean isSameThread) {
+        final Thread thread = Thread.currentThread();
+        if (isSameThread) {
+            assertThat(requestThread == thread).isTrue();
+        } else {
+            assertThat(requestThread == thread).isFalse();
+        }
+        executeTaskForFiveSeconds();
     }
 }
