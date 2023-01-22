@@ -44,4 +44,17 @@ public class ThreadPoolConfig {
         taskExecutor.setAwaitTerminationMillis(20_000L);
         return taskExecutor;
     }
+
+    @Bean
+    public ThreadPoolTaskExecutor threadPoolTaskExecutor4() {
+        final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(1); // 기본 스레드 수
+        taskExecutor.setMaxPoolSize(1); // 최대 스레드 수
+        taskExecutor.setQueueCapacity(0);
+        taskExecutor.setThreadNamePrefix("Executor4-");
+        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
+        taskExecutor.setAwaitTerminationMillis(20_000L);
+        return taskExecutor;
+    }
 }
