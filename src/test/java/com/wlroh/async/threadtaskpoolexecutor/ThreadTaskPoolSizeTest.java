@@ -9,7 +9,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.RejectedExecutionException;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.wlroh.async.threadtaskpoolexecutor.ThreadPoolStep.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
@@ -124,31 +124,6 @@ public class ThreadTaskPoolSizeTest {
 
         assertThatThrownBy(() -> threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds))
                 .isInstanceOf(RejectedExecutionException.class);
-    }
-
-    private void 코어풀_사이즈_조회됨(final ThreadPoolTaskExecutor executor, final int corePoolSize) {
-        final int currentCorePoolSize = executor.getCorePoolSize();
-        assertThat(currentCorePoolSize).isEqualTo(corePoolSize);
-    }
-
-    private void 최대_풀_사이즈_조회됨(final ThreadPoolTaskExecutor executor, final int maxPoolSize) {
-        final int currentMaxPoolSize = executor.getMaxPoolSize();
-        assertThat(currentMaxPoolSize).isEqualTo(maxPoolSize);
-    }
-
-    private void 큐_용량_조회됨(final ThreadPoolTaskExecutor executor, final int queueCapacity) {
-        final int currentQueueCapacity = executor.getQueueCapacity();
-        assertThat(currentQueueCapacity).isEqualTo(queueCapacity);
-    }
-
-    private void 사용중인_풀_사이즈_조회됨(final ThreadPoolTaskExecutor executor, final int poolSize) {
-        final int currentPoolSize = executor.getPoolSize();
-        assertThat(currentPoolSize).isEqualTo(poolSize);
-    }
-
-    private void 현재_큐_사이즈_조회됨(final ThreadPoolTaskExecutor executor, final int queueSize) {
-        final int currentQueueSize = executor.getQueueSize();
-        assertThat(currentQueueSize).isEqualTo(queueSize);
     }
 
     private void executeTaskForFiveSeconds() {
