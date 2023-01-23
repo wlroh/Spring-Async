@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.RejectedExecutionException;
@@ -25,7 +24,7 @@ public class RejectedExceptionTest {
     private ThreadPoolTaskExecutor threadPoolTaskExecutor4;
 
     @Autowired
-    private ApplicationContext context;
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor5;
 
     @DisplayName("AbortPolicy 의 경우 항상 예외를 반환한다.")
     @Test
@@ -59,6 +58,28 @@ public class RejectedExceptionTest {
         현재_큐_사이즈_조회됨(threadPoolTaskExecutor4, 0);
 
         threadPoolTaskExecutor4.execute(() -> this.executeTaskForFiveSeconds(requestThread, true));
+    }
+
+    @DisplayName("DiscardPolicy 의 경우 거절된 Task 의 경우 버려진다.")
+    @Test
+    void discardPolicyTest() {
+        // given
+        코어풀_사이즈_조회됨(threadPoolTaskExecutor5, 1);
+        최대_풀_사이즈_조회됨(threadPoolTaskExecutor5, 1);
+        큐_용량_조회됨(threadPoolTaskExecutor5, 0);
+
+        // when
+        threadPoolTaskExecutor5.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor5, 1);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor5, 0);
+
+        threadPoolTaskExecutor5.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor5, 1);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor5, 0);
+
+        threadPoolTaskExecutor5.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor5, 1);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor5, 0);
     }
 
     private void executeTaskForFiveSeconds() {
