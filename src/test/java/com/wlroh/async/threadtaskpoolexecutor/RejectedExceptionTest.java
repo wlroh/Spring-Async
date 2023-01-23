@@ -26,6 +26,9 @@ public class RejectedExceptionTest {
     @Autowired
     private ThreadPoolTaskExecutor threadPoolTaskExecutor5;
 
+    @Autowired
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor6;
+
     @DisplayName("AbortPolicy 의 경우 항상 예외를 반환한다.")
     @Test
     void abortPolicyTest() {
@@ -82,6 +85,41 @@ public class RejectedExceptionTest {
         현재_큐_사이즈_조회됨(threadPoolTaskExecutor5, 0);
     }
 
+    @DisplayName("DiscardOldestPolicy 의 경우 가장 오래된 큐의 Task 를 버리고 새로운 Task를 ")
+    @Test
+    void discardOldestPolicyTest() {
+        // given
+        코어풀_사이즈_조회됨(threadPoolTaskExecutor6, 1);
+        최대_풀_사이즈_조회됨(threadPoolTaskExecutor6, 1);
+        큐_용량_조회됨(threadPoolTaskExecutor6, 2);
+
+        // when
+        threadPoolTaskExecutor6.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor6, 1);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor6, 0);
+
+        threadPoolTaskExecutor6.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor6, 1);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor6, 1);
+
+        threadPoolTaskExecutor6.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor6, 1);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor6, 2);
+
+        threadPoolTaskExecutor6.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor6, 1);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor6, 2);
+    }
+
+    @DisplayName("가장 오랜된 Queue 는 등록된 큐중에 제일 처음에 등록된 큐이다.")
+    @Test
+    void oldestQueueTest() {
+        threadPoolTaskExecutor6.execute(() -> this.executeTaskForFiveSeconds(1));
+        threadPoolTaskExecutor6.execute(() -> this.executeTaskForFiveSeconds(2));
+        threadPoolTaskExecutor6.execute(() -> this.executeTaskForFiveSeconds(3));
+        threadPoolTaskExecutor6.execute(() -> this.executeTaskForFiveSeconds(4));
+    }
+
     private void executeTaskForFiveSeconds() {
         log.info("do task");
         try {
@@ -99,6 +137,11 @@ public class RejectedExceptionTest {
         } else {
             assertThat(requestThread == thread).isFalse();
         }
+        executeTaskForFiveSeconds();
+    }
+
+    private void executeTaskForFiveSeconds(final int id) {
+        log.info("id={}", id);
         executeTaskForFiveSeconds();
     }
 }
