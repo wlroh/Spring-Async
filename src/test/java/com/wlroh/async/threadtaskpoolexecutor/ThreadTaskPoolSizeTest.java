@@ -27,6 +27,9 @@ public class ThreadTaskPoolSizeTest {
     @Autowired
     private ThreadPoolTaskExecutor threadPoolTaskExecutor7;
 
+    @Autowired
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor8;
+
     @DisplayName("executeTask() 를 비동기로 실행한다.")
     @Test
     void asyncTest() {
@@ -191,6 +194,35 @@ public class ThreadTaskPoolSizeTest {
         // then
         assertThat(threadPoolTaskExecutor7.getPoolSize()).isEqualTo(threadPoolTaskExecutor7.getCorePoolSize());
         assertThat(threadPoolTaskExecutor7.getActiveCount()).isZero();
+    }
+
+    @DisplayName("setAllowCoreThreadTimeOut 설정으로 CoreThreadPool 도 종료할 수 있다.")
+    @Test
+    void setAllowCoreThreadTimeOutTest() throws InterruptedException {
+        // given
+        코어풀_사이즈_조회됨(threadPoolTaskExecutor8, 1);
+        최대_풀_사이즈_조회됨(threadPoolTaskExecutor8, 5);
+        큐_용량_조회됨(threadPoolTaskExecutor8, 0);
+
+        // when
+        threadPoolTaskExecutor8.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor8, 1);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor8, 0);
+
+        threadPoolTaskExecutor8.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor8, 2);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor8, 0);
+
+        final LocalDateTime start = LocalDateTime.now().plusSeconds(15);
+        LocalDateTime now = LocalDateTime.now();
+        while (start.isAfter(now)) {
+            now = LocalDateTime.now();
+            Thread.sleep(1_000L);
+        }
+
+        // then
+        assertThat(threadPoolTaskExecutor8.getPoolSize()).isZero();
+        assertThat(threadPoolTaskExecutor8.getActiveCount()).isZero();
     }
 
     private void executeTaskForFiveSeconds() {
