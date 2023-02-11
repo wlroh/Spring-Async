@@ -8,7 +8,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class ThreadPoolConfig {
 
     @Bean
-    public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
+    public ThreadPoolTaskExecutor myThreadPoolTaskExecutor() {
         final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setCorePoolSize(2); // 기본 스레드 수
         taskExecutor.setMaxPoolSize(5); // 최대 스레드 수
@@ -19,11 +19,10 @@ public class ThreadPoolConfig {
     }
 
     @Bean
-    public ThreadPoolTaskExecutor threadPoolTaskExecutor2() {
+    public ThreadPoolTaskExecutor myThreadPoolTaskExecutor2() {
         final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setCorePoolSize(2); // 기본 스레드 수
         taskExecutor.setMaxPoolSize(5); // 최대 스레드 수
-        taskExecutor.setQueueCapacity(0);
         taskExecutor.setThreadNamePrefix("Executor2-");
         taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
         taskExecutor.setAwaitTerminationMillis(20_000L);
