@@ -20,67 +20,36 @@ public class ThreadPoolConfig {
         return taskExecutor;
     }
 
+//    @Bean
+//    public ThreadPoolTaskExecutor threadPoolTaskExecutor2() {
+//        final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+//        taskExecutor.setCorePoolSize(2); // 기본 스레드 수
+//        taskExecutor.setMaxPoolSize(5); // 최대 스레드 수
+//        taskExecutor.setQueueCapacity(0);
+//        taskExecutor.setThreadNamePrefix("Executor2-");
+//        taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
+//        taskExecutor.setAwaitTerminationMillis(20_000L);
+//        return taskExecutor;
+//    }
+
+//    @Bean
+//    public ThreadPoolTaskExecutor threadPoolTaskExecutor2() {
+//        final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+//        taskExecutor.setCorePoolSize(1); // 기본 스레드 수
+//        taskExecutor.setMaxPoolSize(2); // 최대 스레드 수
+//        taskExecutor.setQueueCapacity(1);
+//        taskExecutor.setThreadNamePrefix("Executor2-");
+//        return taskExecutor;
+//    }
+
     @Bean
     public ThreadPoolTaskExecutor threadPoolTaskExecutor2() {
         final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(2); // 기본 스레드 수
-        taskExecutor.setMaxPoolSize(5); // 최대 스레드 수
-        taskExecutor.setQueueCapacity(0);
+        taskExecutor.setCorePoolSize(1); // 기본 스레드 수
+        taskExecutor.setMaxPoolSize(2); // 최대 스레드 수
+        taskExecutor.setQueueCapacity(1);
+        taskExecutor.setKeepAliveSeconds(3);
         taskExecutor.setThreadNamePrefix("Executor2-");
-        taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
-        taskExecutor.setAwaitTerminationMillis(20_000L);
-        return taskExecutor;
-    }
-
-    @Bean
-    public ThreadPoolTaskExecutor threadPoolTaskExecutor3() {
-        final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(1); // 기본 스레드 수
-        taskExecutor.setMaxPoolSize(1); // 최대 스레드 수
-        taskExecutor.setQueueCapacity(0);
-        taskExecutor.setThreadNamePrefix("Executor3-");
-        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
-        taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
-        taskExecutor.setAwaitTerminationMillis(20_000L);
-        return taskExecutor;
-    }
-
-    @Bean
-    public ThreadPoolTaskExecutor threadPoolTaskExecutor4() {
-        final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(1); // 기본 스레드 수
-        taskExecutor.setMaxPoolSize(1); // 최대 스레드 수
-        taskExecutor.setQueueCapacity(0);
-        taskExecutor.setThreadNamePrefix("Executor4-");
-        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
-        taskExecutor.setAwaitTerminationMillis(20_000L);
-        return taskExecutor;
-    }
-
-    @Bean
-    public ThreadPoolTaskExecutor threadPoolTaskExecutor5() {
-        final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(1); // 기본 스레드 수
-        taskExecutor.setMaxPoolSize(1); // 최대 스레드 수
-        taskExecutor.setQueueCapacity(0);
-        taskExecutor.setThreadNamePrefix("Executor5-");
-        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
-        taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
-        taskExecutor.setAwaitTerminationMillis(20_000L);
-        return taskExecutor;
-    }
-
-    @Bean
-    public ThreadPoolTaskExecutor threadPoolTaskExecutor6() {
-        final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(1); // 기본 스레드 수
-        taskExecutor.setMaxPoolSize(1); // 최대 스레드 수
-        taskExecutor.setQueueCapacity(2);
-        taskExecutor.setThreadNamePrefix("Executor6-");
-        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
-        taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
-        taskExecutor.setAwaitTerminationMillis(20_000L);
         return taskExecutor;
     }
 
@@ -108,6 +77,58 @@ public class ThreadPoolConfig {
         taskExecutor.setAwaitTerminationMillis(20_000L);
         taskExecutor.setKeepAliveSeconds(10);
         taskExecutor.setAllowCoreThreadTimeOut(true);
+        return taskExecutor;
+    }
+
+    @Bean
+    public ThreadPoolTaskExecutor abortPolicyTaskExecutor() {
+        final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(1); // 기본 스레드 수
+        taskExecutor.setMaxPoolSize(1); // 최대 스레드 수
+        taskExecutor.setQueueCapacity(0);
+        taskExecutor.setThreadNamePrefix("abortPolicy-");
+        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        taskExecutor.setWaitForTasksToCompleteOnShutdown(true); // 비동기 로직이 모두 수행될 때까지 테스트 코드 종료되지 않기 위해 설정
+        taskExecutor.setAwaitTerminationMillis(20_000L);        // 비동기 로직이 모두 수행될 때까지 테스트 코드 종료되지 않기 위해 설정
+        return taskExecutor;
+    }
+
+    @Bean
+    public ThreadPoolTaskExecutor callerRunsPolicyTaskExecutor() {
+        final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(1); // 기본 스레드 수
+        taskExecutor.setMaxPoolSize(1); // 최대 스레드 수
+        taskExecutor.setQueueCapacity(0);
+        taskExecutor.setThreadNamePrefix("callerRunsPolicy-");
+        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        taskExecutor.setWaitForTasksToCompleteOnShutdown(true); // 비동기 로직이 모두 수행될 때까지 테스트 코드 종료되지 않기 위해 설정
+        taskExecutor.setAwaitTerminationMillis(20_000L);        // 비동기 로직이 모두 수행될 때까지 테스트 코드 종료되지 않기 위해 설정
+        return taskExecutor;
+    }
+
+    @Bean
+    public ThreadPoolTaskExecutor discardPolicyTaskExecutor() {
+        final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(1); // 기본 스레드 수
+        taskExecutor.setMaxPoolSize(1); // 최대 스레드 수
+        taskExecutor.setQueueCapacity(0);
+        taskExecutor.setThreadNamePrefix("discardPolicy-");
+        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
+        taskExecutor.setWaitForTasksToCompleteOnShutdown(true); // 비동기 로직이 모두 수행될 때까지 테스트 코드 종료되지 않기 위해 설정
+        taskExecutor.setAwaitTerminationMillis(20_000L);        // 비동기 로직이 모두 수행될 때까지 테스트 코드 종료되지 않기 위해 설정
+        return taskExecutor;
+    }
+
+    @Bean
+    public ThreadPoolTaskExecutor discardOldestPolicyTaskExecutor() {
+        final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(1); // 기본 스레드 수
+        taskExecutor.setMaxPoolSize(1); // 최대 스레드 수
+        taskExecutor.setQueueCapacity(2);
+        taskExecutor.setThreadNamePrefix("discardOldestPolicy-");
+        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
+        taskExecutor.setWaitForTasksToCompleteOnShutdown(true); // 비동기 로직이 모두 수행될 때까지 테스트 코드 종료되지 않기 위해 설정
+        taskExecutor.setAwaitTerminationMillis(20_000L);        // 비동기 로직이 모두 수행될 때까지 테스트 코드 종료되지 않기 위해 설정
         return taskExecutor;
     }
 }

@@ -18,31 +18,31 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class RejectedExceptionTest {
 
     @Autowired
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor3;
+    private ThreadPoolTaskExecutor abortPolicyTaskExecutor;
 
     @Autowired
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor4;
+    private ThreadPoolTaskExecutor callerRunsPolicyTaskExecutor;
 
     @Autowired
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor5;
+    private ThreadPoolTaskExecutor discardPolicyTaskExecutor;
 
     @Autowired
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor6;
+    private ThreadPoolTaskExecutor discardOldestPolicyTaskExecutor;
 
     @DisplayName("AbortPolicy 의 경우 항상 예외를 반환한다.")
     @Test
     void abortPolicyTest() {
         // given
-        코어풀_사이즈_조회됨(threadPoolTaskExecutor3, 1);
-        최대_풀_사이즈_조회됨(threadPoolTaskExecutor3, 1);
-        큐_용량_조회됨(threadPoolTaskExecutor3, 0);
+        코어풀_사이즈_조회됨(abortPolicyTaskExecutor, 1);
+        최대_풀_사이즈_조회됨(abortPolicyTaskExecutor, 1);
+        큐_용량_조회됨(abortPolicyTaskExecutor, 0);
 
         // when
-        threadPoolTaskExecutor3.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor3, 1);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor3, 0);
+        abortPolicyTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(abortPolicyTaskExecutor, 1);
+        현재_큐_사이즈_조회됨(abortPolicyTaskExecutor, 0);
 
-        assertThatThrownBy(() -> threadPoolTaskExecutor3.execute(this::executeTaskForFiveSeconds))
+        assertThatThrownBy(() -> abortPolicyTaskExecutor.execute(this::executeTaskForFiveSeconds))
                 .isInstanceOf(RejectedExecutionException.class);
     }
 
@@ -50,74 +50,74 @@ public class RejectedExceptionTest {
     @Test
     void callerRunsPolicyTest() {
         // given
-        코어풀_사이즈_조회됨(threadPoolTaskExecutor4, 1);
-        최대_풀_사이즈_조회됨(threadPoolTaskExecutor4, 1);
-        큐_용량_조회됨(threadPoolTaskExecutor4, 0);
+        코어풀_사이즈_조회됨(callerRunsPolicyTaskExecutor, 1);
+        최대_풀_사이즈_조회됨(callerRunsPolicyTaskExecutor, 1);
+        큐_용량_조회됨(callerRunsPolicyTaskExecutor, 0);
         final Thread requestThread = Thread.currentThread();
 
         // when
-        threadPoolTaskExecutor4.execute(() -> this.executeTaskForFiveSeconds(requestThread, false));
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor4, 1);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor4, 0);
+        callerRunsPolicyTaskExecutor.execute(() -> this.executeTaskForFiveSeconds(requestThread, false));
+        사용중인_풀_사이즈_조회됨(callerRunsPolicyTaskExecutor, 1);
+        현재_큐_사이즈_조회됨(callerRunsPolicyTaskExecutor, 0);
 
-        threadPoolTaskExecutor4.execute(() -> this.executeTaskForFiveSeconds(requestThread, true));
+        callerRunsPolicyTaskExecutor.execute(() -> this.executeTaskForFiveSeconds(requestThread, true));
     }
 
     @DisplayName("DiscardPolicy 의 경우 거절된 Task 의 경우 버려진다.")
     @Test
     void discardPolicyTest() {
         // given
-        코어풀_사이즈_조회됨(threadPoolTaskExecutor5, 1);
-        최대_풀_사이즈_조회됨(threadPoolTaskExecutor5, 1);
-        큐_용량_조회됨(threadPoolTaskExecutor5, 0);
+        코어풀_사이즈_조회됨(discardPolicyTaskExecutor, 1);
+        최대_풀_사이즈_조회됨(discardPolicyTaskExecutor, 1);
+        큐_용량_조회됨(discardPolicyTaskExecutor, 0);
 
         // when
-        threadPoolTaskExecutor5.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor5, 1);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor5, 0);
+        discardPolicyTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(discardPolicyTaskExecutor, 1);
+        현재_큐_사이즈_조회됨(discardPolicyTaskExecutor, 0);
 
-        threadPoolTaskExecutor5.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor5, 1);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor5, 0);
+        discardPolicyTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(discardPolicyTaskExecutor, 1);
+        현재_큐_사이즈_조회됨(discardPolicyTaskExecutor, 0);
 
-        threadPoolTaskExecutor5.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor5, 1);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor5, 0);
+        discardPolicyTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(discardPolicyTaskExecutor, 1);
+        현재_큐_사이즈_조회됨(discardPolicyTaskExecutor, 0);
     }
 
-    @DisplayName("DiscardOldestPolicy 의 경우 가장 오래된 큐의 Task 를 버리고 새로운 Task를 ")
+    @DisplayName("DiscardOldestPolicy 의 경우 가장 오래된 큐의 Task 를 버리고 새로운 Task를 큐에 등록한다")
     @Test
     void discardOldestPolicyTest() {
         // given
-        코어풀_사이즈_조회됨(threadPoolTaskExecutor6, 1);
-        최대_풀_사이즈_조회됨(threadPoolTaskExecutor6, 1);
-        큐_용량_조회됨(threadPoolTaskExecutor6, 2);
+        코어풀_사이즈_조회됨(discardOldestPolicyTaskExecutor, 1);
+        최대_풀_사이즈_조회됨(discardOldestPolicyTaskExecutor, 1);
+        큐_용량_조회됨(discardOldestPolicyTaskExecutor, 2);
 
         // when
-        threadPoolTaskExecutor6.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor6, 1);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor6, 0);
+        discardOldestPolicyTaskExecutor.execute(() -> this.executeTaskForFiveSeconds(1));
+        사용중인_풀_사이즈_조회됨(discardOldestPolicyTaskExecutor, 1);
+        현재_큐_사이즈_조회됨(discardOldestPolicyTaskExecutor, 0);
 
-        threadPoolTaskExecutor6.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor6, 1);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor6, 1);
+        discardOldestPolicyTaskExecutor.execute(() -> this.executeTaskForFiveSeconds(2));
+        사용중인_풀_사이즈_조회됨(discardOldestPolicyTaskExecutor, 1);
+        현재_큐_사이즈_조회됨(discardOldestPolicyTaskExecutor, 1);
 
-        threadPoolTaskExecutor6.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor6, 1);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor6, 2);
+        discardOldestPolicyTaskExecutor.execute(() -> this.executeTaskForFiveSeconds(3));
+        사용중인_풀_사이즈_조회됨(discardOldestPolicyTaskExecutor, 1);
+        현재_큐_사이즈_조회됨(discardOldestPolicyTaskExecutor, 2);
 
-        threadPoolTaskExecutor6.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor6, 1);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor6, 2);
+        discardOldestPolicyTaskExecutor.execute(() -> this.executeTaskForFiveSeconds(4));
+        사용중인_풀_사이즈_조회됨(discardOldestPolicyTaskExecutor, 1);
+        현재_큐_사이즈_조회됨(discardOldestPolicyTaskExecutor, 2);
     }
 
     @DisplayName("가장 오랜된 Queue 는 등록된 큐중에 제일 처음에 등록된 큐이다.")
     @Test
     void oldestQueueTest() {
-        threadPoolTaskExecutor6.execute(() -> this.executeTaskForFiveSeconds(1));
-        threadPoolTaskExecutor6.execute(() -> this.executeTaskForFiveSeconds(2));
-        threadPoolTaskExecutor6.execute(() -> this.executeTaskForFiveSeconds(3));
-        threadPoolTaskExecutor6.execute(() -> this.executeTaskForFiveSeconds(4));
+        discardOldestPolicyTaskExecutor.execute(() -> this.executeTaskForFiveSeconds(1));
+        discardOldestPolicyTaskExecutor.execute(() -> this.executeTaskForFiveSeconds(2));
+        discardOldestPolicyTaskExecutor.execute(() -> this.executeTaskForFiveSeconds(3));
+        discardOldestPolicyTaskExecutor.execute(() -> this.executeTaskForFiveSeconds(4));
     }
 
     private void executeTaskForFiveSeconds() {
@@ -141,7 +141,12 @@ public class RejectedExceptionTest {
     }
 
     private void executeTaskForFiveSeconds(final int id) {
-        log.info("id={}", id);
-        executeTaskForFiveSeconds();
+        log.info("do task[{}]", id);
+        try {
+            Thread.sleep(5_000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        log.info("end do task[{}]", id);
     }
 }

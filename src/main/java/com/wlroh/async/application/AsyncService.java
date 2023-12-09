@@ -32,9 +32,9 @@ public class AsyncService {
         log.info("end Test Method");
     }
 
-    @Async("threadPoolTaskExecutor4")
+    @Async("callerRunsPolicyTaskExecutor")
     public void asyncWithThreadPoolTaskExecutor() {
-        // threadPoolTaskExecutor4 가 관리하는 Thread 이용해 Task 수행
+        // callerRunsPolicyTaskExecutor 가 관리하는 Thread 이용해 Task 수행
         log.info("call Test Method");
         try {
             Thread.sleep(5_000L);
