@@ -22,6 +22,9 @@ public class ThreadTaskPoolSizeTest {
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Autowired
+    private ThreadPoolTaskExecutor noQueueTaskExecutor;
+
+    @Autowired
     private ThreadPoolTaskExecutor threadPoolTaskExecutor2;
 
     @Autowired
@@ -49,6 +52,7 @@ public class ThreadTaskPoolSizeTest {
     void queueTest() {
         // given
         코어풀_사이즈_조회됨(threadPoolTaskExecutor, 2);
+        큐_용량_조회됨(threadPoolTaskExecutor, 3);
 
         // when
         threadPoolTaskExecutor.execute(this::executeTaskForFiveSeconds);
@@ -74,64 +78,88 @@ public class ThreadTaskPoolSizeTest {
 
     @DisplayName("corePool 이 모두 사용중이고 QueueCapacity 가 가득차면 신규 Pool 이 생성된다.")
     @Test
-    void queueCapacity_noValue() {
+    void new_thread_test() {
         // given
-        코어풀_사이즈_조회됨(threadPoolTaskExecutor2, 2);
-        큐_용량_조회됨(threadPoolTaskExecutor2, 0);
+        코어풀_사이즈_조회됨(threadPoolTaskExecutor, 2);
+        최대_풀_사이즈_조회됨(threadPoolTaskExecutor, 5);
+        큐_용량_조회됨(threadPoolTaskExecutor, 3);
 
         // when
-        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 1);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
+        threadPoolTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor, 1);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor, 0);
 
-        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 2);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
+        threadPoolTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor, 2);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor, 0);
 
-        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 3);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
+        threadPoolTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor, 2);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor, 1);
 
-        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 4);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
+        threadPoolTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor, 2);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor, 2);
 
-        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 5);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
+        threadPoolTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor, 2);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor, 3);
+
+        threadPoolTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor, 3);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor, 3);
+
+        threadPoolTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor, 4);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor, 3);
+
+        threadPoolTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor, 5);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor, 3);
     }
 
     @DisplayName("maxPoolSize 에 도달하면 기본 정책일 경우 예외를 반환한다.")
     @Test
-    void maxPoolSize() {
+    void overflowMaxPoolSize() {
         // given
-        코어풀_사이즈_조회됨(threadPoolTaskExecutor2, 2);
-        최대_풀_사이즈_조회됨(threadPoolTaskExecutor2, 5);
-        큐_용량_조회됨(threadPoolTaskExecutor2, 0);
+        코어풀_사이즈_조회됨(noQueueTaskExecutor, 1);
+        최대_풀_사이즈_조회됨(noQueueTaskExecutor, 3);
+        큐_용량_조회됨(noQueueTaskExecutor, 0);
 
         // when
-        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
+        noQueueTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(noQueueTaskExecutor, 1);
+
+        noQueueTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(noQueueTaskExecutor, 2);
+
+        noQueueTaskExecutor.execute(this::executeTaskForFiveSeconds);
+        사용중인_풀_사이즈_조회됨(noQueueTaskExecutor, 3);
+
+        assertThatThrownBy(() -> noQueueTaskExecutor.execute(this::executeTaskForFiveSeconds))
+                .isInstanceOf(RejectedExecutionException.class);
+    }
+
+    @DisplayName("큐가 가득찬 후 요청 건들은 신규 쓰레드에서 바로 수행된다.")
+    @Test
+    void test() {
+        // given
+        코어풀_사이즈_조회됨(threadPoolTaskExecutor2, 1);
+        최대_풀_사이즈_조회됨(threadPoolTaskExecutor2, 2);
+        큐_용량_조회됨(threadPoolTaskExecutor2, 1);
+
+        // when
+        threadPoolTaskExecutor2.execute(() -> executeTaskForFiveSeconds(1));
         사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 1);
         현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
 
-        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
+        threadPoolTaskExecutor2.execute(() -> executeTaskForFiveSeconds(2));
+        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 1);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 1);
+
+        threadPoolTaskExecutor2.execute(() -> executeTaskForFiveSeconds(3));
         사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 2);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
-
-        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 3);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
-
-        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 4);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
-
-        threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds);
-        사용중인_풀_사이즈_조회됨(threadPoolTaskExecutor2, 5);
-        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 0);
-
-        assertThatThrownBy(() -> threadPoolTaskExecutor2.execute(this::executeTaskForFiveSeconds))
-                .isInstanceOf(RejectedExecutionException.class);
+        현재_큐_사이즈_조회됨(threadPoolTaskExecutor2, 1);
     }
 
     @DisplayName("CorePoolSize 를 초과한 Pool 은 사용 후 설정된 keepAliveSeconds(기본값 60초) 시간 이후 종료된다.")
@@ -233,5 +261,15 @@ public class ThreadTaskPoolSizeTest {
             throw new RuntimeException(e);
         }
         log.info("end do task");
+    }
+
+    private void executeTaskForFiveSeconds(final int sequence) {
+        log.info("do task[{}]", sequence);
+        try {
+            Thread.sleep(5_000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        log.info("end do task[{}]", sequence);
     }
 }
